@@ -143,7 +143,7 @@ if [ -d "$AGENTDIR" ]; then
     cp -f $AGENTDIR/config.yaml _config_backup.yaml
     [ -f $AGENTDIR/mappings/custom_logging_plugins.yaml ] && cp $AGENTDIR/mappings/custom_logging_plugins.yaml _custom_logging_backup.yaml
     [ -f $AGENTDIR/scripts/custom_scripts.lua ] && cp $AGENTDIR/scripts/custom_scripts.lua _custom_script_backup.yaml
-    rm -rf checksum* sfagent* mappings
+    rm -rf checksum* sfagent* mappings normalization
     curl -sL $RELEASEURL \
     | grep -w "browser_download_url" \
     | cut -d":" -f 2,3 \
@@ -157,6 +157,9 @@ if [ -d "$AGENTDIR" ]; then
     mv -f mappings/* $AGENTDIR/mappings/
     mv -f scripts/* $AGENTDIR/scripts/
     mv -f certs/* $AGENTDIR/certs/
+    #Creation of normalization dir to be removed in future once older agents are upgraded
+    mkdir -p $AGENTDIR/normalization
+    mv -f normalization/* $AGENTDIR/normalization/
     mv -f config.yaml.sample $AGENTDIR/config.yaml.sample
     echo "Copying back config.yaml and customer scripts"
     cp -f _config_backup.yaml $AGENTDIR/config.yaml
@@ -182,7 +185,7 @@ install_apm_agent()
     echo "                         "
     echo "Install sfagent started"
     ARCH=`uname -m`
-    rm -rf checksum* sfagent* mappings $AGENTDIR
+    rm -rf checksum* sfagent* mappings normalization $AGENTDIR
     curl -sL $RELEASEURL \
     | grep -w "browser_download_url" \
     | cut -d":" -f 2,3 \
@@ -194,11 +197,13 @@ install_apm_agent()
     mkdir -p $AGENTDIR/mappings
     mkdir -p $AGENTDIR/scripts
     mkdir -p $AGENTDIR/certs
+    mkdir -p $AGENTDIR/normalization
     mv sfagent $AGENTDIR
     mv jolokia.jar $AGENTDIR
     mv mappings $AGENTDIR/.
     mv scripts $AGENTDIR/.
     mv certs $AGENTDIR/.
+    mv normalization $AGENTDIR/.
     mv config.yaml.sample $AGENTDIR/config.yaml.sample
     cat > $AGENTDIR/config.yaml <<EOF
 agent:
